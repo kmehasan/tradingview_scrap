@@ -9,7 +9,7 @@
 # 2. clone the project
 
 ```
-git clone
+git clone https://github.com/kmehasan/tradingview_scrap.git
 ```
 Store all the links that you want to scrap in `input.txt`
 
