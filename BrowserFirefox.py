@@ -23,7 +23,9 @@ class Browser:
         canvas = self.browser.find_element(By.XPATH,'//canvas')
         self.a.move_to_element(canvas).send_keys(Keys.ARROW_RIGHT).perform()
     def goToFirst(self):
+        print('Go to first data')
         for _ in range(150):
+            print('Move left (ctrl + left arrow)')
             canvas = self.browser.find_element(By.XPATH,'//canvas')
             self.a.key_down(Keys.CONTROL)\
                 .send_keys_to_element(canvas, Keys.ARROW_LEFT)\
@@ -52,8 +54,9 @@ class Browser:
             try:        
                 values_elements = self.browser.find_elements(By.XPATH, "//*[@class='chart-data-window-item-value']")
                 values = [value.get_attribute('innerText').replace('−','-') for value in values_elements if value.get_attribute('innerText') != '']
-                print(values)
+                print('Current date ==>',values[0])
                 if values[0] == '∅':
+                    print('Finally reached to first data')
                     break
             except Exception as e:
                 # with open("error_data.html", 'a',encoding='utf-8') as f:
@@ -62,6 +65,7 @@ class Browser:
                 pass
             
     def clickDataBtn(self):
+        print('Open data window')
         data_btn = WebDriverWait(self.browser, 10).until(
             EC.visibility_of_element_located((By.XPATH, '//button[@data-name="data-window"]'))
         )
@@ -108,6 +112,7 @@ class Browser:
         return values, date_data
         
     def getAlldata(self,name):
+        print('Scraping data ==>')
         self.is_runnig = True
         self.scrapped_date = []
         with open(f'data/{name}_data.csv', 'w',encoding='utf-8') as f:
