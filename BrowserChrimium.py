@@ -127,6 +127,11 @@ class Browser:
         print('Scraping data ==>')
         self.is_runnig = True
         self.scrapped_date = []
+        
+        isExistsData = os.path.exists('data')
+        if not isExistsData:
+            os.makedirs('data')
+        
         with open(f'data/{name}_data.csv', 'w',encoding='utf-8') as f:
             f.write('Date,Open,High,Low,Close\n')
             while self.is_runnig:
