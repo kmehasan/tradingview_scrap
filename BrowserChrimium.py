@@ -29,6 +29,7 @@ class Browser:
         options.add_argument("--disable-dev-shm-usage")
         
         self.browser = webdriver.Chrome(options=options)
+        self.browser.set_window_size(2660,1440)
         self.a = ActionChains(self.browser)
 
     def goRight(self):
