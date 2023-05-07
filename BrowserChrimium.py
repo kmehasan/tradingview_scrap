@@ -7,16 +7,28 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 
+import chromedriver_autoinstaller
+
 from datetime import datetime, timedelta
 import time
 import pandas as pd
+import os
 
 
 class Browser:
     def __init__(self):
+        chromedriver_autoinstaller.install()
+        isExist = os.path.exists('chrome_user_dir')
+        if not isExist:
+            os.makedirs('chrome_user_dir')
         options = Options()
-        options.headless = True
-        self.browser = webdriver.Chrome(options=options,executable_path = ChromeDriverManager().install())
+        # options.headless = True
+        options.add_argument('--user-data-dir=chrome_user_dir')
+        options.add_argument('--no-sandbox')
+        options.add_argument('--headless')
+        options.add_argument("--disable-dev-shm-usage")
+        
+        self.browser = webdriver.Chrome(options=options)
         self.a = ActionChains(self.browser)
 
     def goRight(self):
