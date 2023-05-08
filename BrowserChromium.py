@@ -14,7 +14,15 @@ import time
 import pandas as pd
 import os
 
-
+day_dict = {
+    'Mon':0,
+    'Tue':1,
+    'Wed':2,
+    'Thu':3,
+    'Fri':4,
+    'Sat':5,
+    'Sun':6
+}
 class Browser:
     def __init__(self):
         chromedriver_autoinstaller.install()
@@ -39,30 +47,12 @@ class Browser:
         print('Go to first data')
         for _ in range(150):
             print('Move left (ctrl + left arrow)')
-            canvas = self.browser.find_element(By.XPATH,'//canvas')
             self.a.key_down(Keys.CONTROL)\
-                .send_keys_to_element(canvas, Keys.ARROW_LEFT)\
-                .pause(0.01)\
-                .send_keys_to_element(canvas, Keys.ARROW_LEFT)\
-                .pause(0.01)\
-                .send_keys_to_element(canvas, Keys.ARROW_LEFT)\
-                .pause(0.01)\
-                .send_keys_to_element(canvas, Keys.ARROW_LEFT)\
-                .pause(0.01)\
-                .send_keys_to_element(canvas, Keys.ARROW_LEFT)\
-                .pause(0.01)\
-                .send_keys_to_element(canvas, Keys.ARROW_LEFT)\
-                .pause(0.01)\
-                .send_keys_to_element(canvas, Keys.ARROW_LEFT)\
-                .pause(0.01)\
-                .send_keys_to_element(canvas, Keys.ARROW_LEFT)\
-                .pause(0.01)\
-                .send_keys_to_element(canvas, Keys.ARROW_LEFT)\
-                .pause(0.01)\
-                .send_keys_to_element(canvas, Keys.ARROW_LEFT)\
-                .pause(0.01)\
-                    .key_up(Keys.CONTROL)\
-                        .perform()
+                .key_down(Keys.ARROW_LEFT)\
+                .pause(5)\
+                .key_up(Keys.ARROW_LEFT)\
+                .key_up(Keys.CONTROL)\
+                .perform()
             time.sleep(1)
             try:        
                 values_elements = self.browser.find_elements(By.XPATH, "//*[@class='chart-data-window-item-value']")
@@ -105,6 +95,9 @@ class Browser:
                     return [], None
                 # values[0] convert into date from string
                 date_data = datetime.strptime(values[0], "%a %d %b '%y")
+                # check century
+                while date_data.weekday() != day_dict[values[0][:3]]:
+                    date_data = date_data.replace(year=date_data.year - 100)
                 values[0] = date_data.strftime('%Y-%m-%d')
                 if len(self.scrapped_date)>0 and values[0] == self.scrapped_date[-1]:
                     time.sleep(.1)
@@ -142,11 +135,12 @@ class Browser:
                     self.goRight()
                     time.sleep(0.2)
                     continue
+                print(date_data,datetime.now(),date_data >= datetime.now())
                 if date_data >= datetime.now():
                     break
                 if values[0] not in self.scrapped_date and date_data < datetime.now():
-                    print(values[:-1])
-                    f.write(','.join(values[:-1]) + '\n')
+                    print(values[:5])
+                    f.write(','.join(values[:5]) + '\n')
                 self.scrapped_date.append(values[0])
 
                 self.goRight()
