@@ -44,9 +44,11 @@ class Browser:
         canvas = self.browser.find_element(By.XPATH,'//canvas')
         self.a.move_to_element(canvas).send_keys(Keys.ARROW_RIGHT).perform()
     def goToFirst(self):
+        canvas = self.browser.find_element(By.XPATH,'//canvas')
         print('Go to first data')
         for _ in range(150):
             print('Move left (ctrl + left arrow)')
+            self.a.move_to_element(canvas).perform()
             self.a.key_down(Keys.CONTROL)\
                 .key_down(Keys.ARROW_LEFT)\
                 .pause(5)\
