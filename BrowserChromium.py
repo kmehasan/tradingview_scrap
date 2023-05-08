@@ -26,7 +26,7 @@ day_dict = {
 class Browser:
     def __init__(self):
         chromedriver_autoinstaller.install()
-        shutil.rmtree('chrome_user_dir')
+        shutil.rmtree('chrome_user_dir',ignore_errors=True)
         isExist = os.path.exists('chrome_user_dir')
         if not isExist:
             os.makedirs('chrome_user_dir')
