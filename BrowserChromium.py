@@ -13,7 +13,7 @@ from datetime import datetime, timedelta
 import time
 import pandas as pd
 import os
-
+import shutil
 day_dict = {
     'Mon':0,
     'Tue':1,
@@ -26,9 +26,11 @@ day_dict = {
 class Browser:
     def __init__(self):
         chromedriver_autoinstaller.install()
+        shutil.rmtree('chrome_user_dir')
         isExist = os.path.exists('chrome_user_dir')
         if not isExist:
             os.makedirs('chrome_user_dir')
+            print("Create new session for chromes")
         options = Options()
         # options.headless = True
         options.add_argument('--user-data-dir=chrome_user_dir')
@@ -55,6 +57,7 @@ class Browser:
                 .key_up(Keys.ARROW_LEFT)\
                 .key_up(Keys.CONTROL)\
                 .perform()
+            self.a.move_to_element(canvas).send_keys(Keys.ARROW_LEFT).perform()
             time.sleep(1)
             try:        
                 values_elements = self.browser.find_elements(By.XPATH, "//*[@class='chart-data-window-item-value']")
@@ -71,7 +74,7 @@ class Browser:
             
     def clickDataBtn(self):
         print('Open data window')
-        data_btn = WebDriverWait(self.browser, 10).until(
+        data_btn = WebDriverWait(self.browser, 60).until(
             EC.visibility_of_element_located((By.XPATH, '//button[@data-name="data-window"]'))
         )
         # data_btn = self.browser.find_element(By.XPATH, '//button[@data-name="data-window"]')
@@ -102,12 +105,11 @@ class Browser:
                     date_data = date_data.replace(year=date_data.year - 100)
                 values[0] = date_data.strftime('%Y-%m-%d')
                 if len(self.scrapped_date)>0 and values[0] == self.scrapped_date[-1]:
-                    time.sleep(.1)
                     day_before_7 = datetime.now() - timedelta(days=7)
                     if date_data > day_before_7:
                         self.is_runnig = False
                         return [], None
-                    return self.getSingleValue()
+                    return [], None
                 break
             except Exception as e:
                 error_count += 1
@@ -135,7 +137,7 @@ class Browser:
                 values, date_data = self.getSingleValue()
                 if date_data is None:
                     self.goRight()
-                    time.sleep(0.2)
+                    time.sleep(0.1)
                     continue
                 print(date_data,datetime.now(),date_data >= datetime.now())
                 if date_data >= datetime.now():
