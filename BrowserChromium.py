@@ -24,7 +24,13 @@ day_dict = {
     'Sun':6
 }
 class Browser:
-    def __init__(self):
+    def __init__(self,url):
+        print('\n\n'+url)
+        last_date_str = input('Enter last date (YYYY-MM-DD HH:MM): ')
+        try:
+            self.last_date = datetime.strptime(last_date_str, '%Y-%m-%d %H:%M')
+        except:
+            self.last_date = datetime.strptime(last_date_str, '%Y-%m-%d')
         chromedriver_autoinstaller.install()
         shutil.rmtree('chrome_user_dir',ignore_errors=True)
         isExist = os.path.exists('chrome_user_dir')
@@ -42,9 +48,37 @@ class Browser:
         self.browser.set_window_size(2660,1440)
         self.a = ActionChains(self.browser)
 
+        try:
+            self.login()
+        except Exception as e:
+            print(e)
+
+    def login(self):
+        self.browser.get('https://www.tradingview.com/')
+        
+        email = 'tacah78286@jwsuns.com'
+        password = 'tacah78286@jwsuns.com'
+        time.sleep(1)
+        self.browser.find_element(By.XPATH, '//button[@aria-label="Open user menu"]').click()
+        time.sleep(1)
+        self.browser.find_element(By.XPATH, '//button[@data-name="header-user-menu-sign-in"]').click()
+        time.sleep(1)
+        self.browser.find_element(By.CLASS_NAME, 'js-show-email').click()
+        time.sleep(1)
+        self.browser.find_element(By.XPATH, '//input[@name="username"]').send_keys(email)
+        self.browser.find_element(By.XPATH, '//input[@name="password"]').send_keys(password)
+        time.sleep(1)
+        self.browser.find_element(By.XPATH, '//button[@type="submit"]').click()
+        time.sleep(2)
+
+        
+
     def goRight(self):
         canvas = self.browser.find_element(By.XPATH,'//canvas')
         self.a.move_to_element(canvas).send_keys(Keys.ARROW_RIGHT).perform()
+    def goLeft(self):
+        canvas = self.browser.find_element(By.XPATH,'//canvas')
+        self.a.move_to_element(canvas).send_keys(Keys.ARROW_LEFT).perform()
     def goToFirst(self):
         canvas = self.browser.find_element(By.XPATH,'//canvas')
         print('Go to first data')
@@ -71,7 +105,27 @@ class Browser:
                 #     f.write(self.browser.page_source)
                 # exit()
                 pass
-            
+    def goToLast(self):
+        canvas = self.browser.find_element(By.XPATH,'//canvas')
+        print('Go to last data')
+        self.a.move_to_element(canvas).perform()
+        self.a.key_down(Keys.CONTROL)\
+            .pause(0.5)\
+            .key_down(Keys.ARROW_RIGHT)\
+            .pause(5)\
+            .key_up(Keys.ARROW_RIGHT)\
+            .pause(0.5)\
+            .key_up(Keys.CONTROL)\
+            .perform()
+        for _ in range(10):
+            self.a.key_down(Keys.CONTROL)\
+                .pause(0.1)\
+                .send_keys(Keys.UP)\
+                .pause(0.1)\
+                .key_up(Keys.CONTROL)\
+                .perform()
+        time.sleep(1)
+
     def clickDataBtn(self):
         print('Open data window')
         data_btn = WebDriverWait(self.browser, 60).until(
@@ -82,7 +136,14 @@ class Browser:
         canvas = self.browser.find_element(By.XPATH,'//canvas')
         self.a.move_to_element(canvas).perform()
         time.sleep(1)
-        self.goToFirst()
+        # check if data window is opened
+        try:
+            data_value = WebDriverWait(self.browser, 2).until(
+                EC.visibility_of_element_located((By.XPATH, "//*[@class='chart-data-window-item-value']"))
+            )
+        except:
+            self.clickDataBtn()
+        self.goToLast()
     
     def dismissPopUp(self):
         try:
@@ -95,26 +156,39 @@ class Browser:
         while True:
             try:
                 values_elements = self.browser.find_elements(By.XPATH, "//*[@class='chart-data-window-item-value']")
+                title_elements = self.browser.find_elements(By.XPATH, "//*[@class='chart-data-window-item-title']")
+                
                 values = [value.get_attribute('innerText').replace('−','-') for value in values_elements if value.get_attribute('innerText') != '']
+                value_dict = {}
+                for i in range(len(title_elements)):
+                    value_dict[title_elements[i].get_attribute('innerText')] = values[i]
                 if values[0] == '∅':
                     return [], None
+                date_value = value_dict['Date']
+                time_format = "%a %d %b '%y" if "Time" not in value_dict else "%a %d %b '%y %H:%M"
+                if 'Time' in value_dict:
+                    date_value += ' ' + value_dict['Time']
                 # values[0] convert into date from string
-                date_data = datetime.strptime(values[0], "%a %d %b '%y")
+                date_data = datetime.strptime(date_value, time_format)
                 # check century
                 while date_data.weekday() != day_dict[values[0][:3]]:
                     date_data = date_data.replace(year=date_data.year - 100)
-                values[0] = date_data.strftime('%Y-%m-%d')
+                values = []
+                values.append(date_data.strftime('%Y-%m-%d %H:%M'))
+                values.append(value_dict['Open'])
+                values.append(value_dict['High'])
+                values.append(value_dict['Low'])
+                values.append(value_dict['Close'])
+
                 if len(self.scrapped_date)>0 and values[0] == self.scrapped_date[-1]:
-                    day_before_7 = datetime.now() - timedelta(days=7)
-                    if date_data > day_before_7:
-                        self.is_runnig = False
-                        return [], None
                     return [], None
+                if date_data < self.last_date:
+                    self.is_runnig = False
                 break
             except Exception as e:
                 error_count += 1
-                # print(e)
-                time.sleep(1)
+                print(e)
+                time.sleep(0.1)
                 if error_count > 10:
                     with open("error.html", 'a',encoding='utf-8') as f:
                         f.write(self.browser.page_source)
@@ -136,28 +210,40 @@ class Browser:
                 self.dismissPopUp()
                 values, date_data = self.getSingleValue()
                 if date_data is None:
-                    self.goRight()
+                    self.goLeft()
                     time.sleep(0.1)
                     continue
-                print(date_data,datetime.now(),date_data >= datetime.now())
-                if date_data >= datetime.now():
-                    break
+                
                 if values[0] not in self.scrapped_date and date_data < datetime.now():
                     print(values[:5])
                     f.write(','.join(values[:5]) + '\n')
                 self.scrapped_date.append(values[0])
-
-                self.goRight()
-                time.sleep(0.2)
+                self.goLeft()
+                time.sleep(0.1)
 
     def sortData(self,name):
         df = pd.read_csv(f'data/{name}_data.csv')
-        df = df.sort_values(by=['Date'])
-        df.to_csv(f'data/{name}_data.csv',index=False)
+        df = df.sort_values(by=['Date'], ascending = False)
+        df.to_csv(f'data/{name}_data.csv', index=False)
     
     def getAlldataFromUrl(self,url):
         print(url)
         self.browser.get(url)
+        # check if there is launch button
+        try:
+            launch_btn = WebDriverWait(self.browser, 10).until(
+                EC.visibility_of_element_located((By.XPATH, '//button'))
+            )
+            launch_btn = self.browser.find_elements(By.XPATH, '//button')
+            if len(launch_btn) > 1:
+                launch_btn = launch_btn[1]
+                if 'Launch' in launch_btn.get_attribute('innerText'):
+                    launch_btn.click()
+                    time.sleep(2)
+                    self.browser.switch_to.window(self.browser.window_handles[-1])
+        except:
+            pass
+        
         time.sleep(2)
         self.clickDataBtn()
         name = self.browser.title.split()[0].replace('/','_div_')
