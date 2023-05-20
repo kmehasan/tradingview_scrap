@@ -24,15 +24,13 @@ day_dict = {
     'Sun':6
 }
 class Browser:
-    def __init__(self,url):
+    def __init__(self,url,from_date=None,to_date=datetime.now()):
         print('\n\n'+url)
-        last_date_str = input('Enter last date (YYYY-MM-DD HH:MM): ')
-        try:
-            self.last_date = datetime.strptime(last_date_str, '%Y-%m-%d %H:%M')
-        except:
-            self.last_date = datetime.strptime(last_date_str, '%Y-%m-%d')
+        self.last_date = from_date
+        self.first_date = to_date
+        
         chromedriver_autoinstaller.install()
-        shutil.rmtree('chrome_user_dir',ignore_errors=True)
+        # shutil.rmtree('chrome_user_dir',ignore_errors=True)
         isExist = os.path.exists('chrome_user_dir')
         if not isExist:
             os.makedirs('chrome_user_dir')
@@ -51,7 +49,7 @@ class Browser:
         try:
             self.login()
         except Exception as e:
-            print(e)
+            print('Already login')
 
     def login(self):
         self.browser.get('https://www.tradingview.com/')
@@ -214,7 +212,7 @@ class Browser:
                     time.sleep(0.1)
                     continue
                 
-                if values[0] not in self.scrapped_date and date_data < datetime.now():
+                if values[0] not in self.scrapped_date and date_data < self.first_date:
                     print(values[:5])
                     f.write(','.join(values[:5]) + '\n')
                 self.scrapped_date.append(values[0])
