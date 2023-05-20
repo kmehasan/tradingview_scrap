@@ -27,7 +27,11 @@ class Browser:
     def __init__(self,url,from_date=None,to_date=datetime.now()):
         print('\n\n'+url)
         self.last_date = from_date
-        self.first_date = to_date
+        if to_date:
+            self.first_date = to_date
+        else:
+            self.first_date = datetime.now()
+	    
         
         chromedriver_autoinstaller.install()
         # shutil.rmtree('chrome_user_dir',ignore_errors=True)
