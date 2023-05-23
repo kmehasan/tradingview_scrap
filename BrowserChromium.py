@@ -61,12 +61,21 @@ class Browser:
         email = 'tacah78286@jwsuns.com'
         password = 'tacah78286@jwsuns.com'
         time.sleep(1)
-        self.browser.find_element(By.XPATH, '//button[@aria-label="Open user menu"]').click()
-        time.sleep(1)
-        self.browser.find_element(By.XPATH, '//button[@data-name="header-user-menu-sign-in"]').click()
-        time.sleep(1)
-        self.browser.find_element(By.NAME, 'Email').click()
-        time.sleep(1)
+        try:
+            self.browser.find_element(By.XPATH, '//button[@aria-label="Open user menu"]').click()
+            time.sleep(1)
+        except:
+            pass
+        try:
+            self.browser.find_element(By.XPATH, '//button[@data-name="header-user-menu-sign-in"]').click()
+            time.sleep(1)
+        except:
+            pass
+        try:
+            self.browser.find_element(By.NAME, 'Email').click()
+            time.sleep(1)
+        except:
+            pass
         self.browser.find_element(By.ID, 'id_username').send_keys(email)
         self.browser.find_element(By.ID, 'id_password').send_keys(password)
         time.sleep(1)
