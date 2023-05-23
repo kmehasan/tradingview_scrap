@@ -65,12 +65,12 @@ class Browser:
         time.sleep(1)
         self.browser.find_element(By.XPATH, '//button[@data-name="header-user-menu-sign-in"]').click()
         time.sleep(1)
-        self.browser.find_element(By.CLASS_NAME, 'js-show-email').click()
+        self.browser.find_element(By.NAME, 'Email').click()
         time.sleep(1)
-        self.browser.find_element(By.XPATH, '//input[@name="username"]').send_keys(email)
-        self.browser.find_element(By.XPATH, '//input[@name="password"]').send_keys(password)
+        self.browser.find_element(By.ID, 'id_username').send_keys(email)
+        self.browser.find_element(By.ID, 'id_password').send_keys(password)
         time.sleep(1)
-        self.browser.find_element(By.XPATH, '//button[@type="submit"]').click()
+        self.browser.find_element(By.XPATH, "//form/button").click()
         time.sleep(2)
 
         
