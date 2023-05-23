@@ -179,7 +179,7 @@ class Browser:
                             values.append(values_elements[i].get_attribute('innerText'))
                             break
                         except Exception as e:
-                            print(e)
+                            # print(e)
                             values_elements = self.browser.find_elements(By.XPATH, "//*[@class='chart-data-window-item-value']")
                 error_line = 3
                 value_dict = {}
@@ -189,7 +189,7 @@ class Browser:
                             value_dict[title_elements[i].get_attribute('innerText')] = values[i]
                             break
                         except Exception as e:
-                            print(e)
+                            # print(e)
                             title_elements = self.browser.find_elements(By.XPATH, "//*[@class='chart-data-window-item-title']")
                 error_line = 4
                 if values[0] == '∅':
