@@ -47,7 +47,7 @@ class Browser:
         options.add_argument("--disable-dev-shm-usage")
         
         self.browser = webdriver.Chrome(options=options)
-        self.browser.set_window_size(2660,1440)
+        self.browser.set_window_size(1660,840)
         self.a = ActionChains(self.browser)
 
         try:
@@ -165,20 +165,41 @@ class Browser:
     def getSingleValue(self):
         error_count = 0
         while True:
+
+            error_line = 0
             try:
+                error_line = 1
                 values_elements = self.browser.find_elements(By.XPATH, "//*[@class='chart-data-window-item-value']")
                 title_elements = self.browser.find_elements(By.XPATH, "//*[@class='chart-data-window-item-title']")
-                
-                values = [value.get_attribute('innerText').replace('−','-') for value in values_elements if value.get_attribute('innerText') != '']
+                error_line = 2
+                values = []
+                for i in range(len(values_elements)):
+                    while True:
+                        try:
+                            values.append(values_elements[i].get_attribute('innerText'))
+                            break
+                        except Exception as e:
+                            print(e)
+                            values_elements = self.browser.find_elements(By.XPATH, "//*[@class='chart-data-window-item-value']")
+                error_line = 3
                 value_dict = {}
                 for i in range(len(title_elements)):
-                    value_dict[title_elements[i].get_attribute('innerText')] = values[i]
+                    while True:
+                        try:
+                            value_dict[title_elements[i].get_attribute('innerText')] = values[i]
+                            break
+                        except Exception as e:
+                            print(e)
+                            title_elements = self.browser.find_elements(By.XPATH, "//*[@class='chart-data-window-item-title']")
+                error_line = 4
                 if values[0] == '∅':
                     return [], None
+                error_line = 5
                 date_value = value_dict['Date']
                 time_format = "%a %d %b '%y" if "Time" not in value_dict else "%a %d %b '%y %H:%M"
                 if 'Time' in value_dict:
                     date_value += ' ' + value_dict['Time']
+                error_line = 6
                 # values[0] convert into date from string
                 date_data = datetime.strptime(date_value, time_format)
                 # check century
@@ -198,6 +219,7 @@ class Browser:
                 break
             except Exception as e:
                 error_count += 1
+                print('Error line ==>',error_line)
                 print(e)
                 time.sleep(0.1)
                 if error_count > 10:
