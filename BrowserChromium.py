@@ -14,6 +14,9 @@ import time
 import pandas as pd
 import os
 import shutil
+import pytz
+
+utc = pytz.timezone("UTC")
 day_dict = {
     'Mon':0,
     'Tue':1,
@@ -28,9 +31,13 @@ class Browser:
         print('\n\n'+url)
         self.last_date = from_date
         if to_date:
+            to_date = to_date.astimezone(utc)
+            to_date = datetime.strptime(to_date.strftime('%Y-%m-%d %H:%M'), '%Y-%m-%d %H:%M')
             self.first_date = to_date
         else:
             self.first_date = datetime.now()
+            self.first_date = self.first_date.astimezone(utc)
+            self.first_date = datetime.strptime(self.first_date.strftime('%Y-%m-%d %H:%M'), '%Y-%m-%d %H:%M')
 	    
         
         chromedriver_autoinstaller.install()

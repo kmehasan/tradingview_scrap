@@ -5,7 +5,8 @@ def getDateFromString(date_string):
     if date_string is None:
         return None
     try:
-        date = datetime.datetime.strptime(date_string, '%Y-%m-%d-%H:%M:%S')
+        date_string = date_string.strip()+"+00:00"
+        date = datetime.datetime.strptime(date_string, '%Y-%m-%d-%H:%M:%S+00:00')
     except ValueError:
         print("Incorrect data format, should be YYYY-MM-DD-HH:MM:SS")
         exit()
