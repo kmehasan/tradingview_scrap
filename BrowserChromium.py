@@ -30,6 +30,9 @@ class Browser:
     def __init__(self,url,from_date=None,to_date=datetime.now()):
         print('\n\n'+url)
         self.last_date = from_date
+        self.last_date_str = from_date.strftime('%Y-%m-%d-%H:%M:%S')
+        
+        
         if to_date:
             to_date = to_date.astimezone(utc)
             to_date = datetime.strptime(to_date.strftime('%Y-%m-%d %H:%M'), '%Y-%m-%d %H:%M')
@@ -40,6 +43,7 @@ class Browser:
             self.first_date = datetime.strptime(self.first_date.strftime('%Y-%m-%d %H:%M'), '%Y-%m-%d %H:%M')
 	    
         
+        self.first_date_str = self.first_date.strftime('%Y-%m-%d-%H:%M:%S')
         chromedriver_autoinstaller.install()
         # shutil.rmtree('chrome_user_dir',ignore_errors=True)
         isExist = os.path.exists('chrome_user_dir')
@@ -126,7 +130,9 @@ class Browser:
     def goToLast(self):
         canvas = self.browser.find_element(By.XPATH,'//canvas')
         print('Go to last data')
+        # set focus
         self.a.move_to_element(canvas).perform()
+        # Go to last data
         self.a.key_down(Keys.CONTROL)\
             .pause(0.5)\
             .key_down(Keys.ARROW_RIGHT)\
@@ -135,6 +141,7 @@ class Browser:
             .pause(0.5)\
             .key_up(Keys.CONTROL)\
             .perform()
+        # zoom to max
         for _ in range(10):
             self.a.key_down(Keys.CONTROL)\
                 .pause(0.1)\
@@ -142,6 +149,28 @@ class Browser:
                 .pause(0.1)\
                 .key_up(Keys.CONTROL)\
                 .perform()
+                
+        # zoom out a little bit
+        self.a.key_down(Keys.CONTROL)\
+                .pause(0.1)\
+                .send_keys(Keys.DOWN)\
+                .pause(0.1)\
+                .send_keys(Keys.DOWN)\
+                .pause(0.1)\
+                .send_keys(Keys.DOWN)\
+                .pause(0.1)\
+                .key_up(Keys.CONTROL)\
+                .perform()
+        
+        # try to go last again
+        self.a.key_down(Keys.CONTROL)\
+            .pause(0.5)\
+            .key_down(Keys.ARROW_RIGHT)\
+            .pause(1)\
+            .key_up(Keys.ARROW_RIGHT)\
+            .pause(0.5)\
+            .key_up(Keys.CONTROL)\
+            .perform()
         time.sleep(1)
 
     def clickDataBtn(self):
@@ -244,7 +273,7 @@ class Browser:
         if not isExistsData:
             os.makedirs('data')
         
-        with open(f'data/{name}_data.csv', 'w',encoding='utf-8') as f:
+        with open(f'data/{name}_timeframe_{self.last_date_str}_{self.first_date_str}.csv', 'w',encoding='utf-8') as f:
             f.write('Date,Open,High,Low,Close\n')
             while self.is_runnig:
                 self.dismissPopUp()
@@ -262,9 +291,9 @@ class Browser:
                 time.sleep(0.1)
 
     def sortData(self,name):
-        df = pd.read_csv(f'data/{name}_data.csv')
+        df = pd.read_csv(f'data/{name}_timeframe_{self.last_date_str}_{self.first_date_str}.csv')
         df = df.sort_values(by=['Date'], ascending = False)
-        df.to_csv(f'data/{name}_data.csv', index=False)
+        df.to_csv(f'data/{name}_timeframe_{self.last_date_str}_{self.first_date_str}.csv', index=False)
     
     def getAlldataFromUrl(self,url):
         print(url)
