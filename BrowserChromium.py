@@ -252,6 +252,7 @@ class Browser:
                     return [], None
                 if date_data < self.last_date:
                     self.is_runnig = False
+                    return None, None
                 break
             except Exception as e:
                 error_count += 1
@@ -283,7 +284,7 @@ class Browser:
                     time.sleep(0.1)
                     continue
                 
-                if values[0] not in self.scrapped_date and date_data < self.first_date:
+                if values[0] not in self.scrapped_date and date_data <= self.first_date:
                     print(values[:5])
                     f.write(','.join(values[:5]) + '\n')
                 self.scrapped_date.append(values[0])
