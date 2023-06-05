@@ -34,9 +34,10 @@ class Browser:
         
         
         if to_date:
-            to_date = to_date.astimezone(utc)
+            # to_date = to_date.astimezone(utc)
             to_date = datetime.strptime(to_date.strftime('%Y-%m-%d %H:%M'), '%Y-%m-%d %H:%M')
             self.first_date = to_date
+            print(to_date)
         else:
             self.first_date = datetime.now()
             self.first_date = self.first_date.astimezone(utc)
